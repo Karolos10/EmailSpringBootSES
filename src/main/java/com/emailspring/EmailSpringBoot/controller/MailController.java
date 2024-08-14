@@ -22,4 +22,9 @@ public class MailController {
     void demo(){
         mailService.sendHtml();
     }
+
+    @GetMapping("/template")
+    void template(){
+        mailService.sentTemplate();
+    }
 }

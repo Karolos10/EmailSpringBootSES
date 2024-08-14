@@ -3,10 +3,15 @@ package com.emailspring.EmailSpringBoot.service;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
 import com.amazonaws.services.simpleemail.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class MailService {
@@ -37,7 +42,7 @@ public class MailService {
 
         Context context = new Context();
         context.setVariable("name", "Karlos");
-        context.setVariable("domain", "Http://karlos.org");
+        context.setVariable("domain", "http://karlos.org");
         String html = templateEngine.process("Hello", context);
 
         Content htmlContent = new Content().withData(html);
@@ -52,5 +57,26 @@ public class MailService {
                 .withMessage(message);
 
         client.sendEmail(emailRequest);
+    }
+
+    public void sentTemplate(){
+        Destination destination = new Destination().withToAddresses(MY_EMAIL);
+
+        Map<String, String> data = new HashMap<>();
+        data.put("name", "Carlos Miguel Rodriguez");
+        data.put("domain", "http://karlos.org");
+
+        try{
+            String templaData = new ObjectMapper().writeValueAsString(data);
+
+            SendTemplatedEmailRequest emailRequest = new SendTemplatedEmailRequest().withSource(MY_EMAIL)
+                    .withDestination(destination)
+                    .withTemplate("MyTemplateSES")
+                            .withTemplateData(templaData);
+
+            client.sendTemplatedEmail(emailRequest);
+        }catch (JsonProcessingException e){
+            throw  new RuntimeException();
+        }
     }
 }
